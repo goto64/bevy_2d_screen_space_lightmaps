@@ -1,7 +1,7 @@
 use bevy::input::mouse::{MouseScrollUnit, MouseWheel};
 use bevy::prelude::*;
 use bevy::render::view::RenderLayers;
-use crate::lightmap_plugin::lightmap_plugin::{CAMERA_LAYER_LIGHT, CAMERA_LAYER_SPRITE, LightmapPlugin};
+use crate::lightmap_plugin::lightmap_plugin::{CAMERA_LAYER_LIGHT, CAMERA_LAYER_SPRITE, LightmapPlugin, AnyNormalCamera};
 
 mod lightmap_plugin;
 
@@ -187,10 +187,10 @@ fn move_truck(
 
 pub fn camera_movement(
     mut wheel: EventReader<MouseWheel>,
-    mut query: Query<&mut OrthographicProjection, With<Camera>>,
+    mut query: Query<&mut OrthographicProjection, With<AnyNormalCamera>>,
 ) {
-    for mut ortho in query.iter_mut() {
-        for ev in wheel.read() {
+    for ev in wheel.read() {
+        for mut ortho in query.iter_mut() {
             match ev.unit {
                 MouseScrollUnit::Line => {
                     if ev.y > 0.0 {
@@ -201,7 +201,8 @@ pub fn camera_movement(
                 }
                 _ => {}
             }
+            ortho.scale = ortho.scale.clamp(0.5, 1.5);
         }
-        ortho.scale = ortho.scale.clamp(0.5, 1.0);
+
     }
 }

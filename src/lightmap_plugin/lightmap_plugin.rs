@@ -34,6 +34,9 @@ pub struct SpriteCamera;
 pub struct LightCamera;
 
 #[derive(Component)]
+pub struct AnyNormalCamera;
+
+#[derive(Component)]
 struct PostProcessingQuad;
 
 const BLEND_ADD: BlendState = BlendState {
@@ -157,6 +160,7 @@ fn setup_sprite_camera(
             Name::new("sprite_camera"),
         ))
         .insert(SpriteCamera)
+        .insert(AnyNormalCamera)
         .insert(RenderLayers::from_layers(CAMERA_LAYER_SPRITE))
         .insert(UiCameraConfig {
             show_ui: false,
@@ -176,6 +180,7 @@ fn setup_sprite_camera(
             Name::new("light_camera"),
         ))
         .insert(LightCamera)
+        .insert(AnyNormalCamera)
         .insert(RenderLayers::from_layers(CAMERA_LAYER_LIGHT))
         .insert(UiCameraConfig {
             show_ui: false,
