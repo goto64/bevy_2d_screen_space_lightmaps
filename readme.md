@@ -8,6 +8,10 @@ This is an example of how it can be implemented with the Bevy engine.
 
 You can find more details about the technique here: https://slembcke.github.io/2D-Lighting-Overview
 
+_Screenshot from the example code:_
+
+![sample_screenshot](/screenshot/screen_space_lightmaps_sample.png)
+
 ### Technical Details ###
 
 The plugin uses three cameras: 
@@ -27,13 +31,9 @@ To use the plugin, you just need to:
 Note that the clear color set on the light camera determines the level 
 of ambient light in your scene.
 
-See the example code in `main.rs` for details.
-
+See the example code in `main.rs` for details.  
+Note that you can zoom in-out using the mouse wheel.  
 To run the example use: `cargo run --release`
-
-#### Remaining To-Dos ####
-* Handle resizing of the window.
-* Handle zoom levels.
 
 #### Credits ####
 Some of the code was borrowed from https://github.com/zaycev/bevy-magic-light-2d

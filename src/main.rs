@@ -1,3 +1,4 @@
+use bevy::input::mouse::{MouseScrollUnit, MouseWheel};
 use bevy::prelude::*;
 use bevy::render::view::RenderLayers;
 use crate::lightmap_plugin::lightmap_plugin::{CAMERA_LAYER_LIGHT, CAMERA_LAYER_SPRITE, LightmapPlugin};
@@ -25,7 +26,7 @@ fn main() {
 
     app.add_plugins(LightmapPlugin);
     app.add_systems(Startup, (spawn_road_entities, spawn_truck_entities));
-    app.add_systems(Update, move_truck);
+    app.add_systems(Update, (move_truck, camera_movement));
     app.run();
 }
 
@@ -36,7 +37,7 @@ fn spawn_road_entities(
     let road_tex = asset_server.load("sample_art/road_segment.png");
     let grass_tex = asset_server.load("sample_art/grass.png");
     let y_top = -64.0 * 5.0;
-    for i in 0..10 {
+    for i in 0..11 {
         commands.spawn(SpriteBundle {
             texture: road_tex.clone(),
             transform: Transform::from_xyz(64.0, y_top + 64.0 * i as f32, SPRITE_FLOOR_LAYER_Z),
@@ -181,5 +182,26 @@ fn move_truck(
         } else {
             transform.translation.y += move_y * time.delta_seconds();
         }
+    }
+}
+
+pub fn camera_movement(
+    mut wheel: EventReader<MouseWheel>,
+    mut query: Query<&mut OrthographicProjection, With<Camera>>,
+) {
+    for mut ortho in query.iter_mut() {
+        for ev in wheel.read() {
+            match ev.unit {
+                MouseScrollUnit::Line => {
+                    if ev.y > 0.0 {
+                        ortho.scale -= 0.1;
+                    } else if ev.y < 0.0 {
+                        ortho.scale += 0.1;
+                    }
+                }
+                _ => {}
+            }
+        }
+        ortho.scale = ortho.scale.clamp(0.5, 1.0);
     }
 }

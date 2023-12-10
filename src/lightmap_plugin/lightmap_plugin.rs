@@ -7,7 +7,7 @@ use bevy::render::render_resource::{AsBindGroup, BlendComponent, BlendFactor, Bl
 use bevy::render::texture::BevyDefault;
 use bevy::render::view::RenderLayers;
 use bevy::sprite::{Material2d, Material2dKey, Material2dPlugin, MaterialMesh2dBundle};
-use bevy::window::PrimaryWindow;
+use bevy::window::{PrimaryWindow, WindowResized};
 
 
 pub struct LightmapPlugin;
@@ -16,6 +16,7 @@ impl Plugin for LightmapPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(Material2dPlugin::<BlendTexturesMaterial>::default());
         app.add_systems(Startup, (setup_post_processing_camera, setup_sprite_camera).chain());
+        app.add_systems(Update, on_resize_window);
         app.init_resource::<CameraTargets>();
     }
 }
@@ -247,4 +248,36 @@ fn setup_post_processing_camera(
         },
         layer
     ));
+}
+
+fn on_resize_window(
+    mut resize_reader: EventReader<WindowResized>,
+    window: Query<&Window, With<PrimaryWindow>>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut camera_targets: ResMut<CameraTargets>,
+    mut images: ResMut<Assets<Image>>,
+    mut materials: ResMut<Assets<BlendTexturesMaterial>>,
+) {
+    for ev in resize_reader.read() {
+        let Ok(window) = window.get_single() else { panic!("No window") };
+        let primary_size = Vec2::new(
+            (ev.width as f64 / window.scale_factor()) as f32,
+            (ev.height as f64 / window.scale_factor()) as f32,
+        );
+
+        let quad =  Mesh::from(shape::Quad::new(Vec2::new(
+            primary_size.x,
+            primary_size.y,
+        )));
+        meshes.insert(POST_PROCESSING_QUAD.clone(), quad);
+
+        *camera_targets = CameraTargets::create(&mut images, &primary_size);
+
+        let material = BlendTexturesMaterial {
+            texture1: camera_targets.sprite_target.clone(),
+            texture2: camera_targets.light_target.clone(),
+        };
+
+        materials.insert(POST_PROCESSING_MATERIAL.clone(), material);
+    }
 }
