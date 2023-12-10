@@ -38,4 +38,4 @@ To run the example use: `cargo run --release`
 #### Credits ####
 Some of the code was borrowed from https://github.com/zaycev/bevy-magic-light-2d
 
-The sample uses some assets made by beeler and Icons8.
+The sample uses some assets made by beeler, Gif and Icons8.
