@@ -1,6 +1,6 @@
 use bevy::core_pipeline::bloom::BloomSettings;
+use bevy::render::camera::ClearColorConfig;
 use bevy::prelude::*;
-use bevy::reflect::TypeUuid;
 use bevy::render::camera::RenderTarget;
 use bevy::render::mesh::MeshVertexBufferLayout;
 use bevy::render::render_resource::{AsBindGroup, BlendComponent, BlendFactor, BlendOperation, BlendState, Extent3d, RenderPipelineDescriptor, ShaderRef, SpecializedMeshPipelineError, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages};
@@ -17,7 +17,25 @@ impl Plugin for LightmapPlugin {
         app.add_plugins(Material2dPlugin::<BlendTexturesMaterial>::default());
         app.add_systems(Startup, (setup_post_processing_camera, setup_sprite_camera).chain());
         app.add_systems(Update, on_resize_window);
+        app.init_resource::<LightmapPluginSettings>();
         app.init_resource::<CameraTargets>();
+    }
+}
+
+#[derive(Resource)]
+pub struct LightmapPluginSettings {
+    clear_color: ClearColorConfig,
+    ambient_light: Color,
+    bloom: Option<BloomSettings>,
+}
+
+impl Default for LightmapPluginSettings {
+    fn default() -> Self {
+        Self {
+            clear_color: ClearColorConfig::Default,
+            ambient_light: Color::rgb(0.3, 0.3, 0.3),
+            bloom: None,
+        }
     }
 }
 
@@ -53,8 +71,7 @@ const BLEND_ADD: BlendState = BlendState {
     },
 };
 
-#[derive(AsBindGroup, TypeUuid, TypePath, Asset, Debug, Clone)]
-#[uuid = "a67d88f0-a69a-43ba-b4a7-00c0c9ee3332"]
+#[derive(AsBindGroup, TypePath, Asset, Debug, Clone)]
 struct BlendTexturesMaterial {
     #[texture(1)]
     #[sampler(2)]
@@ -146,6 +163,7 @@ impl CameraTargets {
 fn setup_sprite_camera(
     mut commands: Commands,
     camera_targets: Res<CameraTargets>,
+    lightmap_plugin_settings: Res<LightmapPluginSettings>,
 ) {
     commands
         .spawn((
@@ -153,6 +171,7 @@ fn setup_sprite_camera(
                 camera: Camera {
                     hdr: true,
                     target: RenderTarget::Image(camera_targets.sprite_target.clone()),
+                    clear_color: lightmap_plugin_settings.clear_color.clone(),
                     ..Default::default()
                 },
                 ..Default::default()
@@ -161,11 +180,7 @@ fn setup_sprite_camera(
         ))
         .insert(SpriteCamera)
         .insert(AnyNormalCamera)
-        .insert(RenderLayers::from_layers(CAMERA_LAYER_SPRITE))
-        .insert(UiCameraConfig {
-            show_ui: false,
-            ..default()
-        });
+        .insert(RenderLayers::from_layers(CAMERA_LAYER_SPRITE));
 
     commands
         .spawn((
@@ -173,6 +188,7 @@ fn setup_sprite_camera(
                 camera: Camera {
                     hdr: true,
                     target: RenderTarget::Image(camera_targets.light_target.clone()),
+                    clear_color: ClearColorConfig::Custom(lightmap_plugin_settings.ambient_light),
                     ..Default::default()
                 },
                 ..Default::default()
@@ -181,11 +197,7 @@ fn setup_sprite_camera(
         ))
         .insert(LightCamera)
         .insert(AnyNormalCamera)
-        .insert(RenderLayers::from_layers(CAMERA_LAYER_LIGHT))
-        .insert(UiCameraConfig {
-            show_ui: false,
-            ..default()
-        });
+        .insert(RenderLayers::from_layers(CAMERA_LAYER_LIGHT));
 }
 
 const POST_PROCESSING_QUAD: Handle<Mesh> = Handle::weak_from_u128(23467206864860343678);
@@ -194,6 +206,7 @@ const POST_PROCESSING_MATERIAL: Handle<BlendTexturesMaterial> = Handle::weak_fro
 fn setup_post_processing_camera(
     mut commands: Commands,
     window: Query<&Window, With<PrimaryWindow>>,
+    lightmap_plugin_settings: Res<LightmapPluginSettings>,
     mut camera_targets: ResMut<CameraTargets>,
     mut images: ResMut<Assets<Image>>,
     mut meshes: ResMut<Assets<Mesh>>,
@@ -201,14 +214,11 @@ fn setup_post_processing_camera(
 ) {
     let Ok(window) = window.get_single() else { panic!("No window") };
     let primary_size = Vec2::new(
-        (window.physical_width() as f64 / window.scale_factor()) as f32,
-        (window.physical_height() as f64 / window.scale_factor()) as f32,
+        (window.physical_width() as f32 / window.scale_factor()) as f32,
+        (window.physical_height() as f32 / window.scale_factor()) as f32,
     );
 
-    let quad =  Mesh::from(shape::Quad::new(Vec2::new(
-        primary_size.x,
-        primary_size.y,
-    )));
+    let quad =  Mesh::from(Rectangle::new(primary_size.x, primary_size.y));
     meshes.insert(POST_PROCESSING_QUAD.clone(), quad);
 
     *camera_targets = CameraTargets::create(&mut images, &primary_size);
@@ -237,7 +247,7 @@ fn setup_post_processing_camera(
     ));
 
     // Camera that renders the final image for the screen
-    commands.spawn((
+    let camera_id = commands.spawn((
         Name::new("post_processing_camera"),
         Camera2dBundle {
             camera: Camera {
@@ -247,12 +257,12 @@ fn setup_post_processing_camera(
             },
             ..Camera2dBundle::default()
         },
-        BloomSettings {
-            intensity: 0.1,
-            ..default()
-        },
         layer
-    ));
+    )).id();
+
+    if lightmap_plugin_settings.bloom.is_some() {
+        commands.entity(camera_id).insert(lightmap_plugin_settings.bloom.clone().unwrap());
+    }
 }
 
 fn on_resize_window(
@@ -266,14 +276,11 @@ fn on_resize_window(
     for ev in resize_reader.read() {
         let Ok(window) = window.get_single() else { panic!("No window") };
         let primary_size = Vec2::new(
-            (ev.width as f64 / window.scale_factor()) as f32,
-            (ev.height as f64 / window.scale_factor()) as f32,
+            (ev.width / window.scale_factor()) as f32,
+            (ev.height / window.scale_factor()) as f32,
         );
 
-        let quad =  Mesh::from(shape::Quad::new(Vec2::new(
-            primary_size.x,
-            primary_size.y,
-        )));
+        let quad =  Mesh::from(Rectangle::new(primary_size.x, primary_size.y));
         meshes.insert(POST_PROCESSING_QUAD.clone(), quad);
 
         *camera_targets = CameraTargets::create(&mut images, &primary_size);

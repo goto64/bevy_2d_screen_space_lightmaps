@@ -1,10 +1,37 @@
 [package]
 name = "bevy_2d_screen_space_lightmaps"
-version = "0.1.0"
+description = "Lighting plugin for 2D games made in the Bevy engine. This plugin uses the screen space lightmaps technique"
+license-file = "LICENSE"
+homepage = "https://github.com/goto64/bevy_2d_screen_space_lightmaps"
+repository = "https://github.com/goto64/bevy_2d_screen_space_lightmaps"
+readme = "readme.md"
+version = "0.13.0"
 edition = "2021"
+exclude = ["assets/sample_art/*", "screenshot/*", ".idea/*"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bevy = "0.12.0"
-uuid = "1.5.0"
+bevy = { version = "0.13.0", default-features = false, features = [
+    "bevy_render",
+    "bevy_core_pipeline",
+    "bevy_winit",
+    "bevy_asset",
+    "bevy_sprite",
+    "bevy_ui",
+] }
+
+[[example]]
+name = "moving_truck"
+path = "src/examples/moving_truck.rs"
+
+[dev-dependencies]
+bevy = { version = "0.13.0", default-features = false, features = [
+    "bevy_render",
+    "bevy_core_pipeline",
+    "bevy_winit",
+    "bevy_asset",
+    "bevy_sprite",
+    "bevy_ui",
+    "png",
+] }

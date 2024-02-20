@@ -1,13 +1,13 @@
 #import bevy_sprite::mesh2d_vertex_output::VertexOutput
 
 
-@group(1) @binding(1)
+@group(2) @binding(1)
 var texture1: texture_2d<f32>;
-@group(1) @binding(2)
+@group(2) @binding(2)
 var sampler1: sampler;
-@group(1) @binding(3)
+@group(2) @binding(3)
 var texture2: texture_2d<f32>;
-@group(1) @binding(4)
+@group(2) @binding(4)
 var sampler2: sampler;
 
 @fragment

@@ -1,12 +1,7 @@
 use bevy::input::mouse::{MouseScrollUnit, MouseWheel};
 use bevy::prelude::*;
 use bevy::render::view::RenderLayers;
-use crate::lightmap_plugin::lightmap_plugin::{CAMERA_LAYER_LIGHT, CAMERA_LAYER_SPRITE, LightmapPlugin, AnyNormalCamera};
-
-mod lightmap_plugin;
-
-/// Base light intensity for areas with no light source
-const AMBIENT_LIGHT: Color = Color::rgb(0.3, 0.3, 0.3);
+use bevy_2d_screen_space_lightmaps::lightmap_plugin::lightmap_plugin::{CAMERA_LAYER_SPRITE, CAMERA_LAYER_LIGHT, LightmapPlugin, AnyNormalCamera};
 
 const NORMAL_LIGHT_LAYER_Z: f32 = 0.0;
 const OCCLUDER_LIGHT_LAYER_Z: f32 = 1.0;
@@ -20,9 +15,6 @@ fn main() {
             primary_window: Some(Window { ..Default::default() }),
             ..default()
     }).set(ImagePlugin::default_nearest()));
-
-    // Important: The clear color of the light camera is the ambient light intensity
-    app.insert_resource(ClearColor(AMBIENT_LIGHT));
 
     app.add_plugins(LightmapPlugin);
     app.add_systems(Startup, (spawn_road_entities, spawn_truck_entities));
@@ -203,6 +195,5 @@ pub fn camera_movement(
             }
             ortho.scale = ortho.scale.clamp(0.5, 1.5);
         }
-
     }
 }
