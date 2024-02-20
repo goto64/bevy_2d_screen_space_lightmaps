@@ -4,7 +4,8 @@
 Screen space light maps are one of the simplest lighting techniques for 2D.
 Despite being simple, it can work really well for certain types of 2D games.
 
-This is an example of how it can be implemented with the Bevy engine.
+This library provides an implementation of this technique for the Bevy engine.
+The library is made as a Bevy plugin.
 
 You can find more details about the technique here: https://slembcke.github.io/2D-Lighting-Overview
 
@@ -30,10 +31,19 @@ To use the plugin, you just need to:
 
 Note that the clear color set on the light camera determines the level 
 of ambient light in your scene.
+The plugin provides a resource `LightmapPluginSettings` with which you can 
+change the ambient light setting, the clear color on the sprite camera 
+as well as the bloom intensity.
 
-See the example code in `main.rs` for details.  
-Note that you can zoom in-out using the mouse wheel.  
-To run the example use: `cargo run --release`
+See the example code in `examples/moving_truck.rs` for details.  
+Note that in the example you can zoom in-out using the mouse wheel.  
+To run the example use: `cargo run --example moving_truck`
+
+### Bevy Compatibility ###
+
+Bevy | bevy_2d_screen_space_lightmaps
+--- | ---
+0.13.0 | 0.13.0
 
 #### Credits ####
 Some of the code was borrowed from https://github.com/zaycev/bevy-magic-light-2d
