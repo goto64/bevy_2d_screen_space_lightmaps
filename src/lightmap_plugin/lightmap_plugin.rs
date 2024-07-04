@@ -2,7 +2,7 @@ use bevy::core_pipeline::bloom::BloomSettings;
 use bevy::render::camera::ClearColorConfig;
 use bevy::prelude::*;
 use bevy::render::camera::RenderTarget;
-use bevy::render::mesh::MeshVertexBufferLayout;
+use bevy::render::mesh::{MeshVertexBufferLayoutRef};
 use bevy::render::render_resource::{AsBindGroup, BlendComponent, BlendFactor, BlendOperation, BlendState, Extent3d, RenderPipelineDescriptor, ShaderRef, SpecializedMeshPipelineError, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages};
 use bevy::render::texture::BevyDefault;
 use bevy::render::view::RenderLayers;
@@ -33,17 +33,20 @@ impl Default for LightmapPluginSettings {
     fn default() -> Self {
         Self {
             clear_color: ClearColorConfig::Default,
-            ambient_light: Color::rgb(0.3, 0.3, 0.3),
+            ambient_light: Color::srgb(0.3, 0.3, 0.3),
             bloom: None,
         }
     }
 }
 
 /// All normal sprites must be added to this camera layer
-pub const CAMERA_LAYER_SPRITE: &[u8] = &[1];
+pub const CAMERA_LAYER_SPRITE: &[usize] = &[1];
 
 /// All light sprites must be added to this camera layer
-pub const CAMERA_LAYER_LIGHT: &[u8] = &[2];
+pub const CAMERA_LAYER_LIGHT: &[usize] = &[2];
+
+/// Camera that has the final composite image
+pub const CAMERA_FINAL_IMAGE: &[usize] = &[50];
 
 #[derive(Component)]
 pub struct SpriteCamera;
@@ -89,7 +92,7 @@ impl Material2d for BlendTexturesMaterial {
 
     fn specialize(
         descriptor: &mut RenderPipelineDescriptor,
-        _layout: &MeshVertexBufferLayout,
+        _layout: &MeshVertexBufferLayoutRef,
         _key: Material2dKey<Self>,
     ) -> Result<(), SpecializedMeshPipelineError> {
         if let Some(fragment) = &mut descriptor.fragment {
@@ -150,8 +153,8 @@ impl CameraTargets {
         let sprite_image_handle: Handle<Image> = Handle::weak_from_u128(84562364042238462871);
         let light_image_handle: Handle<Image> = Handle::weak_from_u128(81297563682952991277);
 
-        images.insert(sprite_image_handle.clone(), sprite_image);
-        images.insert(light_image_handle.clone(), light_image);
+        images.insert(&sprite_image_handle, sprite_image);
+        images.insert(&light_image_handle, light_image);
 
         Self {
             sprite_target: sprite_image_handle,
@@ -219,7 +222,7 @@ fn setup_post_processing_camera(
     );
 
     let quad =  Mesh::from(Rectangle::new(primary_size.x, primary_size.y));
-    meshes.insert(POST_PROCESSING_QUAD.clone(), quad);
+    meshes.insert(&POST_PROCESSING_QUAD, quad);
 
     *camera_targets = CameraTargets::create(&mut images, &primary_size);
 
@@ -228,9 +231,9 @@ fn setup_post_processing_camera(
         texture2: camera_targets.light_target.clone(),
     };
 
-    materials.insert(POST_PROCESSING_MATERIAL.clone(), material);
+    materials.insert(&POST_PROCESSING_MATERIAL, material);
 
-    let layer = RenderLayers::layer((RenderLayers::TOTAL_LAYERS - 1) as u8);
+    let layer = RenderLayers::from_layers(CAMERA_FINAL_IMAGE);
 
     commands.spawn((
         PostProcessingQuad,
@@ -243,7 +246,7 @@ fn setup_post_processing_camera(
             },
             ..default()
         },
-        layer,
+        layer.clone(),
     ));
 
     // Camera that renders the final image for the screen
@@ -281,7 +284,7 @@ fn on_resize_window(
         );
 
         let quad =  Mesh::from(Rectangle::new(primary_size.x, primary_size.y));
-        meshes.insert(POST_PROCESSING_QUAD.clone(), quad);
+        meshes.insert(&POST_PROCESSING_QUAD, quad);
 
         *camera_targets = CameraTargets::create(&mut images, &primary_size);
 
@@ -290,6 +293,6 @@ fn on_resize_window(
             texture2: camera_targets.light_target.clone(),
         };
 
-        materials.insert(POST_PROCESSING_MATERIAL.clone(), material);
+        materials.insert(&POST_PROCESSING_MATERIAL, material);
     }
 }
