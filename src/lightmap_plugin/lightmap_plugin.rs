@@ -1,4 +1,4 @@
-use bevy::core_pipeline::bloom::BloomSettings;
+use bevy::core_pipeline::bloom::Bloom;
 use bevy::render::camera::ClearColorConfig;
 use bevy::prelude::*;
 use bevy::render::camera::RenderTarget;
@@ -6,7 +6,7 @@ use bevy::render::mesh::{MeshVertexBufferLayoutRef};
 use bevy::render::render_resource::{AsBindGroup, BlendComponent, BlendFactor, BlendOperation, BlendState, Extent3d, RenderPipelineDescriptor, ShaderRef, SpecializedMeshPipelineError, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages};
 use bevy::render::texture::BevyDefault;
 use bevy::render::view::RenderLayers;
-use bevy::sprite::{Material2d, Material2dKey, Material2dPlugin, MaterialMesh2dBundle};
+use bevy::sprite::{Material2d, Material2dKey, Material2dPlugin};
 use bevy::window::{PrimaryWindow, WindowResized};
 
 
@@ -26,7 +26,7 @@ impl Plugin for LightmapPlugin {
 pub struct LightmapPluginSettings {
     clear_color: ClearColorConfig,
     ambient_light: Color,
-    bloom: Option<BloomSettings>,
+    bloom: Option<Bloom>,
 }
 
 impl Default for LightmapPluginSettings {
@@ -170,13 +170,11 @@ fn setup_sprite_camera(
 ) {
     commands
         .spawn((
-            Camera2dBundle {
-                camera: Camera {
-                    hdr: true,
-                    target: RenderTarget::Image(camera_targets.sprite_target.clone()),
-                    clear_color: lightmap_plugin_settings.clear_color.clone(),
-                    ..Default::default()
-                },
+            Camera2d,
+            Camera {
+                hdr: true,
+                target: RenderTarget::Image(camera_targets.sprite_target.clone()),
+                clear_color: lightmap_plugin_settings.clear_color.clone(),
                 ..Default::default()
             },
             Name::new("sprite_camera"),
@@ -187,13 +185,11 @@ fn setup_sprite_camera(
 
     commands
         .spawn((
-            Camera2dBundle {
-                camera: Camera {
-                    hdr: true,
-                    target: RenderTarget::Image(camera_targets.light_target.clone()),
-                    clear_color: ClearColorConfig::Custom(lightmap_plugin_settings.ambient_light),
-                    ..Default::default()
-                },
+            Camera2d,
+            Camera {
+                hdr: true,
+                target: RenderTarget::Image(camera_targets.light_target.clone()),
+                clear_color: ClearColorConfig::Custom(lightmap_plugin_settings.ambient_light),
                 ..Default::default()
             },
             Name::new("light_camera"),
@@ -237,13 +233,10 @@ fn setup_post_processing_camera(
 
     commands.spawn((
         PostProcessingQuad,
-        MaterialMesh2dBundle {
-            mesh: POST_PROCESSING_QUAD.clone().into(),
-            material: POST_PROCESSING_MATERIAL.clone(),
-            transform: Transform {
-                translation: Vec3::new(0.0, 0.0, 1.5),
-                ..default()
-            },
+        MeshMaterial2d(POST_PROCESSING_MATERIAL.clone()),
+        Mesh2d(POST_PROCESSING_QUAD.clone().into()),
+        Transform {
+            translation: Vec3::new(0.0, 0.0, 1.5),
             ..default()
         },
         layer.clone(),
@@ -252,14 +245,14 @@ fn setup_post_processing_camera(
     // Camera that renders the final image for the screen
     let camera_id = commands.spawn((
         Name::new("post_processing_camera"),
-        Camera2dBundle {
-            camera: Camera {
+        (
+            Camera2d,
+            Camera {
                 order: 1,
                 hdr: true,
                 ..default()
             },
-            ..Camera2dBundle::default()
-        },
+        ),
         layer
     )).id();
 

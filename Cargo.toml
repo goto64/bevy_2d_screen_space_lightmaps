@@ -5,14 +5,14 @@ license-file = "LICENSE"
 homepage = "https://github.com/goto64/bevy_2d_screen_space_lightmaps"
 repository = "https://github.com/goto64/bevy_2d_screen_space_lightmaps"
 readme = "readme.md"
-version = "0.14.0"
+version = "0.15.0"
 edition = "2021"
 exclude = ["assets/sample_art/*", "screenshot/*", ".idea/*"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bevy = { version = "0.14", default-features = false, features = [
+bevy = { version = "0.15.0-rc.3", default-features = false, features = [
     "bevy_render",
     "bevy_core_pipeline",
     "bevy_winit",
@@ -26,7 +26,7 @@ name = "moving_truck"
 path = "src/examples/moving_truck.rs"
 
 [dev-dependencies]
-bevy = { version = "0.14", default-features = false, features = [
+bevy = { version = "0.15.0-rc.3", default-features = false, features = [
     "bevy_render",
     "bevy_core_pipeline",
     "bevy_winit",

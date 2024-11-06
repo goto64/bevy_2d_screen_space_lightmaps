@@ -30,74 +30,79 @@ fn spawn_road_entities(
     let grass_tex = asset_server.load("sample_art/grass.png");
     let y_top = -64.0 * 5.0;
     for i in 0..11 {
-        commands.spawn(SpriteBundle {
-            texture: road_tex.clone(),
-            transform: Transform::from_xyz(64.0, y_top + 64.0 * i as f32, SPRITE_FLOOR_LAYER_Z),
-            ..default()
-        }).insert(RenderLayers::from_layers(CAMERA_LAYER_SPRITE));
+        commands.spawn((
+            Sprite {
+                image: road_tex.clone(),
+                ..default()
+            },
+            Transform::from_xyz(64.0, y_top + 64.0 * i as f32, SPRITE_FLOOR_LAYER_Z),
+        )).insert(RenderLayers::from_layers(CAMERA_LAYER_SPRITE));
 
         // Right side grass
-        commands.spawn(SpriteBundle {
-            texture: grass_tex.clone(),
-            transform: Transform::from_xyz(96.0, y_top + 64.0 * i as f32, SPRITE_FLOOR_LAYER_Z),
-            ..default()
-        }).insert(RenderLayers::from_layers(CAMERA_LAYER_SPRITE));
+        commands.spawn((
+            Sprite {
+                image: grass_tex.clone(),
+                ..default()
+            },
+            Transform::from_xyz(96.0, y_top + 64.0 * i as f32, SPRITE_FLOOR_LAYER_Z),
+        )).insert(RenderLayers::from_layers(CAMERA_LAYER_SPRITE));
 
         // Left side grass
-        commands.spawn(SpriteBundle {
-            texture: grass_tex.clone(),
-            sprite: Sprite {
+        commands.spawn((
+            Sprite {
+                image: grass_tex.clone(),
                 flip_x: true,
                 flip_y: false,
                 ..default()
             },
-            transform: Transform::from_xyz(32.0, y_top + 64.0 * i as f32, SPRITE_FLOOR_LAYER_Z),
-            ..default()
-        }).insert(RenderLayers::from_layers(CAMERA_LAYER_SPRITE));
+            Transform::from_xyz(32.0, y_top + 64.0 * i as f32, SPRITE_FLOOR_LAYER_Z),
+        )).insert(RenderLayers::from_layers(CAMERA_LAYER_SPRITE));
     }
 
     let street_light_tex = asset_server.load("sample_art/street_light.png");
     let y_top = -64.0 * 5.0 + 32.0;
     for i in 0..5 {
         // Street-light, right side of road
-        commands.spawn(SpriteBundle {
-            texture: street_light_tex.clone(),
-            transform: Transform::from_xyz(64.0 + 31.0, y_top + 128.0 * i as f32, SPRITE_OBJECT_LAYER_Z),
-            ..default()
-        }).insert(RenderLayers::from_layers(CAMERA_LAYER_SPRITE));
+        commands.spawn((
+            Sprite {
+                image: street_light_tex.clone(),
+                ..default()
+            },
+            Transform::from_xyz(64.0 + 31.0, y_top + 128.0 * i as f32, SPRITE_OBJECT_LAYER_Z),
+        )).insert(RenderLayers::from_layers(CAMERA_LAYER_SPRITE));
 
         // Street-light, left side of road
-        commands.spawn(SpriteBundle {
-            texture: street_light_tex.clone(),
-            sprite: Sprite {
+        commands.spawn((
+            Sprite {
+                image: street_light_tex.clone(),
                 flip_x: true,
                 flip_y: false,
                 ..default()
             },
-            transform: Transform::from_xyz(31.0, y_top + 128.0 * i as f32, SPRITE_OBJECT_LAYER_Z),
-            ..default()
-        }).insert(RenderLayers::from_layers(CAMERA_LAYER_SPRITE));
+            Transform::from_xyz(31.0, y_top + 128.0 * i as f32, SPRITE_OBJECT_LAYER_Z),
+        )).insert(RenderLayers::from_layers(CAMERA_LAYER_SPRITE));
     }
 
     let yellow_light_corona_tex = asset_server.load("sample_art/yellow_light_corona.png");
     let y_top = -64.0 * 5.0 + 32.0;
     for i in 0..5 {
-        commands.spawn(SpriteBundle {
-            texture: yellow_light_corona_tex.clone(),
-            transform: Transform::from_xyz(64.0 + 25.0, y_top + 128.0 * i as f32, NORMAL_LIGHT_LAYER_Z),
-            ..default()
-        }).insert(RenderLayers::from_layers(CAMERA_LAYER_LIGHT));
+        commands.spawn((
+            Sprite {
+                image: yellow_light_corona_tex.clone(),
+                ..default()
+            },
+            Transform::from_xyz(64.0 + 25.0, y_top + 128.0 * i as f32, NORMAL_LIGHT_LAYER_Z),
+        )).insert(RenderLayers::from_layers(CAMERA_LAYER_LIGHT));
 
-        commands.spawn(SpriteBundle {
-            texture: yellow_light_corona_tex.clone(),
-            sprite: Sprite {
+        commands.spawn((
+            Sprite {
+                image: yellow_light_corona_tex.clone(),
                 flip_x: true,
                 flip_y: false,
                 ..default()
             },
-            transform: Transform::from_xyz(38.0, y_top + 128.0 * i as f32, NORMAL_LIGHT_LAYER_Z),
-            ..default()
-        }).insert(RenderLayers::from_layers(CAMERA_LAYER_LIGHT));
+            Transform::from_xyz(38.0, y_top + 128.0 * i as f32, NORMAL_LIGHT_LAYER_Z),
+        )).insert(RenderLayers::from_layers(CAMERA_LAYER_LIGHT));
     }
 }
 
@@ -115,11 +120,13 @@ fn spawn_truck_entities(
     mut commands: Commands,
     asset_server: Res<AssetServer>
 ) {
-    let truck_id = commands.spawn(SpriteBundle {
-        texture: asset_server.load("sample_art/truck_sprite.png"),
-        transform: Transform::from_xyz(64.0, TRUCK_START_Y, SPRITE_OBJECT_LAYER_Z),
-        ..default()
-    })
+    let truck_id = commands.spawn((
+        Sprite {
+            image: asset_server.load("sample_art/truck_sprite.png"),
+            ..default()
+        },
+        Transform::from_xyz(64.0, TRUCK_START_Y, SPRITE_OBJECT_LAYER_Z),
+    ))
         .insert(RenderLayers::from_layers(CAMERA_LAYER_SPRITE))
         .insert(TruckEntity)
         .id();
@@ -128,27 +135,33 @@ fn spawn_truck_entities(
 
     // This blocks street light from lighting up the top of the truck
     // It must have the same color as the ambient light
-    commands.spawn(SpriteBundle {
-        texture: asset_server.load("sample_art/truck_light_occluder.png"),
-        transform: Transform::from_xyz(64.0, TRUCK_START_Y, OCCLUDER_LIGHT_LAYER_Z),
-        ..default()
-    })
+    commands.spawn((
+        Sprite {
+            image: asset_server.load("sample_art/truck_light_occluder.png"),
+            ..default()
+        },
+        Transform::from_xyz(64.0, TRUCK_START_Y, OCCLUDER_LIGHT_LAYER_Z),
+    ))
         .insert(RenderLayers::from_layers(CAMERA_LAYER_LIGHT))
         .insert(TruckEntity);
 
     // Putting headlights on higher Z layer, so it is the dominant light
-    commands.spawn(SpriteBundle {
-        texture: asset_server.load("sample_art/double_light_cone.png"),
-        transform: Transform::from_xyz(64.0, TRUCK_START_Y - 51.0, NORMAL_LIGHT_LAYER_Z + 0.1),
-        ..default()
-    })
+    commands.spawn((
+        Sprite {
+            image: asset_server.load("sample_art/double_light_cone.png"),
+            ..default()
+        },
+        Transform::from_xyz(64.0, TRUCK_START_Y - 51.0, NORMAL_LIGHT_LAYER_Z + 0.1),
+    ))
         .insert(RenderLayers::from_layers(CAMERA_LAYER_LIGHT))
         .insert(TruckEntity);
-    commands.spawn(SpriteBundle {
-        texture: asset_server.load("sample_art/rear_lights.png"),
-        transform: Transform::from_xyz(64.0, TRUCK_START_Y + 40.0 + 15.0, NORMAL_LIGHT_LAYER_Z),
-        ..default()
-    })
+    commands.spawn((
+        Sprite {
+            image: asset_server.load("sample_art/rear_lights.png"),
+            ..default()
+        },
+        Transform::from_xyz(64.0, TRUCK_START_Y + 40.0 + 15.0, NORMAL_LIGHT_LAYER_Z),
+    ))
         .insert(RenderLayers::from_layers(CAMERA_LAYER_LIGHT))
         .insert(TruckEntity);
 }
@@ -172,7 +185,7 @@ fn move_truck(
         if move_back {
             transform.translation.y += move_y;
         } else {
-            transform.translation.y += move_y * time.delta_seconds();
+            transform.translation.y += move_y * time.delta_secs();
         }
     }
 }
