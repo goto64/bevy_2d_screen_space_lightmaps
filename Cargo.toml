@@ -12,7 +12,7 @@ exclude = ["assets/sample_art/*", "screenshot/*", ".idea/*"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bevy_image = "0.15.0"
+bevy_image = "0.15"
 
 bevy = { version = "0.15", default-features = false, features = [
     "bevy_render",
