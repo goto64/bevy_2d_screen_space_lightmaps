@@ -7,6 +7,8 @@ use bevy::render::render_resource::{AsBindGroup, BlendComponent, BlendFactor, Bl
 use bevy::render::view::RenderLayers;
 use bevy::sprite::{Material2d, Material2dKey, Material2dPlugin};
 use bevy::window::{PrimaryWindow, WindowResized};
+use bevy_image::Image;
+use bevy_image::BevyDefault;
 
 
 pub struct LightmapPlugin;
