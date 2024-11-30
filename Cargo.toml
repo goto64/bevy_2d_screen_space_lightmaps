@@ -12,13 +12,14 @@ exclude = ["assets/sample_art/*", "screenshot/*", ".idea/*"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bevy = { version = "0.15.0-rc.3", default-features = false, features = [
+bevy = { version = "0.15.0", default-features = false, features = [
     "bevy_render",
     "bevy_core_pipeline",
     "bevy_winit",
     "bevy_asset",
     "bevy_sprite",
     "bevy_ui",
+    "bevy_window",
 ] }
 
 [[example]]
@@ -26,12 +27,13 @@ name = "moving_truck"
 path = "src/examples/moving_truck.rs"
 
 [dev-dependencies]
-bevy = { version = "0.15.0-rc.3", default-features = false, features = [
+bevy = { version = "0.15.0", default-features = false, features = [
     "bevy_render",
     "bevy_core_pipeline",
     "bevy_winit",
     "bevy_asset",
     "bevy_sprite",
     "bevy_ui",
+    "bevy_window",
     "png",
 ] }
