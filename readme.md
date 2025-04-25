@@ -41,12 +41,13 @@ To run the example use: `cargo run --example moving_truck`
 
 ### Bevy Compatibility ###
 
-| Bevy    | bevy_2d_screen_space_lightmaps|
-|---------| ---|
-| 0.15.x  | 0.15.0|
-| 0.14.x  | 0.14.0|
-| 0.13.x  | 0.13.1|
-| 0.13.0 | 0.13.0|
+| Bevy   | bevy_2d_screen_space_lightmaps |
+|--------|--------------------------------|
+| 0.16.x | 0.16.0                         |
+| 0.15.x | 0.15.0                         |
+| 0.14.x | 0.14.0                         |
+| 0.13.x | 0.13.1                         |
+| 0.13.0 | 0.13.0                         |
 
 #### Credits ####
 Some of the code was borrowed from https://github.com/zaycev/bevy-magic-light-2d
