@@ -192,21 +192,28 @@ fn move_truck(
 
 pub fn camera_movement(
     mut wheel: EventReader<MouseWheel>,
-    mut query: Query<&mut OrthographicProjection, With<AnyNormalCamera>>,
+    mut query: Query<&mut Projection, With<AnyNormalCamera>>,
 ) {
+
     for ev in wheel.read() {
-        for mut ortho in query.iter_mut() {
-            match ev.unit {
-                MouseScrollUnit::Line => {
-                    if ev.y > 0.0 {
-                        ortho.scale -= 0.1;
-                    } else if ev.y < 0.0 {
-                        ortho.scale += 0.1;
+        for ortho in query.iter_mut() {
+            match *ortho.into_inner() {
+                Projection::Orthographic(ref mut ortho) => {
+                    match ev.unit {
+                        MouseScrollUnit::Line => {
+                            if ev.y > 0.0 {
+                                ortho.scale -= 0.1;
+                            } else if ev.y < 0.0 {
+                                ortho.scale += 0.1;
+                            }
+                        }
+                        _ => {}
                     }
-                }
-                _ => {}
+                    ortho.scale = ortho.scale.clamp(0.5, 1.5);
+                },
+                _ => { }
             }
-            ortho.scale = ortho.scale.clamp(0.5, 1.5);
+
         }
     }
 }

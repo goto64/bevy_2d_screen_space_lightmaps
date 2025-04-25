@@ -1,5 +1,7 @@
+use bevy::asset::weak_handle;
 use bevy::core_pipeline::bloom::Bloom;
-use bevy::render::camera::ClearColorConfig;
+use bevy::math::FloatOrd;
+use bevy::render::camera::{ClearColorConfig, ImageRenderTarget};
 use bevy::prelude::*;
 use bevy::render::camera::RenderTarget;
 use bevy::render::mesh::{MeshVertexBufferLayoutRef};
@@ -7,9 +9,6 @@ use bevy::render::render_resource::{AsBindGroup, BlendComponent, BlendFactor, Bl
 use bevy::render::view::RenderLayers;
 use bevy::sprite::{Material2d, Material2dKey, Material2dPlugin};
 use bevy::window::{PrimaryWindow, WindowResized};
-use bevy_image::Image;
-use bevy_image::BevyDefault;
-
 
 pub struct LightmapPlugin;
 
@@ -151,8 +150,8 @@ impl CameraTargets {
         sprite_image.resize(target_size);
         light_image.resize(target_size);
 
-        let sprite_image_handle: Handle<Image> = Handle::weak_from_u128(84562364042238462871);
-        let light_image_handle: Handle<Image> = Handle::weak_from_u128(81297563682952991277);
+        let sprite_image_handle: Handle<Image> = weak_handle!("4098187b-13f5-4531-a584-a2b4c7ad3e05");
+        let light_image_handle: Handle<Image> = weak_handle!("13e36f32-8c1d-4566-be37-5a7da7cea2ca");
 
         images.insert(&sprite_image_handle, sprite_image);
         images.insert(&light_image_handle, light_image);
@@ -174,7 +173,10 @@ fn setup_sprite_camera(
             Camera2d,
             Camera {
                 hdr: true,
-                target: RenderTarget::Image(camera_targets.sprite_target.clone()),
+                target: RenderTarget::Image(ImageRenderTarget {
+                    handle: camera_targets.sprite_target.clone(),
+                    scale_factor: FloatOrd(1.0),
+                }),
                 clear_color: lightmap_plugin_settings.clear_color.clone(),
                 ..Default::default()
             },
@@ -189,7 +191,10 @@ fn setup_sprite_camera(
             Camera2d,
             Camera {
                 hdr: true,
-                target: RenderTarget::Image(camera_targets.light_target.clone()),
+                target: RenderTarget::Image(ImageRenderTarget {
+                    handle: camera_targets.light_target.clone(),
+                    scale_factor: FloatOrd(1.0),
+                }),
                 clear_color: ClearColorConfig::Custom(lightmap_plugin_settings.ambient_light),
                 ..Default::default()
             },
@@ -200,8 +205,8 @@ fn setup_sprite_camera(
         .insert(RenderLayers::from_layers(CAMERA_LAYER_LIGHT));
 }
 
-const POST_PROCESSING_QUAD: Handle<Mesh> = Handle::weak_from_u128(23467206864860343678);
-const POST_PROCESSING_MATERIAL: Handle<BlendTexturesMaterial> = Handle::weak_from_u128(52374148673736462871);
+const POST_PROCESSING_QUAD: Handle<Mesh> = weak_handle!("36f3e6a8-0837-4544-9ca9-05dfd13ac6b8");
+const POST_PROCESSING_MATERIAL: Handle<BlendTexturesMaterial> = weak_handle!("f9e193d4-d737-433d-820e-9e42b1c70af9");
 
 fn setup_post_processing_camera(
     mut commands: Commands,
@@ -212,7 +217,7 @@ fn setup_post_processing_camera(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<BlendTexturesMaterial>>,
 ) {
-    let Ok(window) = window.get_single() else { panic!("No window") };
+    let Ok(window) = window.single() else { panic!("No window") };
     let primary_size = Vec2::new(
         (window.physical_width() as f32 / window.scale_factor()) as f32,
         (window.physical_height() as f32 / window.scale_factor()) as f32,
@@ -236,10 +241,7 @@ fn setup_post_processing_camera(
         PostProcessingQuad,
         MeshMaterial2d(POST_PROCESSING_MATERIAL.clone()),
         Mesh2d(POST_PROCESSING_QUAD.clone().into()),
-        Transform {
-            translation: Vec3::new(0.0, 0.0, 1.5),
-            ..default()
-        },
+        Transform::from_translation(Vec3::new(0.0, 0.0, 1.5)),
         layer.clone(),
     ));
 
@@ -271,7 +273,7 @@ fn on_resize_window(
     mut materials: ResMut<Assets<BlendTexturesMaterial>>,
 ) {
     for ev in resize_reader.read() {
-        let Ok(window) = window.get_single() else { panic!("No window") };
+        let Ok(window) = window.single() else { panic!("No window") };
         let primary_size = Vec2::new(
             (ev.width / window.scale_factor()) as f32,
             (ev.height / window.scale_factor()) as f32,
