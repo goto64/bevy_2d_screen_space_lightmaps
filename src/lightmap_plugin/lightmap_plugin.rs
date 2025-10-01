@@ -1,14 +1,15 @@
-use bevy::asset::weak_handle;
-use bevy::core_pipeline::bloom::Bloom;
+use bevy::asset::{uuid_handle};
+use bevy::camera::{ImageRenderTarget, RenderTarget};
 use bevy::math::FloatOrd;
-use bevy::render::camera::{ClearColorConfig, ImageRenderTarget};
+use bevy::render::view::Hdr;
 use bevy::prelude::*;
-use bevy::render::camera::RenderTarget;
-use bevy::render::mesh::{MeshVertexBufferLayoutRef};
-use bevy::render::render_resource::{AsBindGroup, BlendComponent, BlendFactor, BlendOperation, BlendState, Extent3d, RenderPipelineDescriptor, ShaderRef, SpecializedMeshPipelineError, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages};
-use bevy::render::view::RenderLayers;
-use bevy::sprite::{Material2d, Material2dKey, Material2dPlugin};
+use bevy::shader::ShaderRef;
+use bevy::mesh::MeshVertexBufferLayoutRef;
+use bevy::render::render_resource::{AsBindGroup, BlendComponent, BlendFactor, BlendOperation, BlendState, Extent3d, RenderPipelineDescriptor, SpecializedMeshPipelineError, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages};
+use bevy::camera::visibility::RenderLayers;
+use bevy::sprite_render::{Material2d, Material2dKey, Material2dPlugin};
 use bevy::window::{PrimaryWindow, WindowResized};
+use bevy::post_process::bloom::Bloom;
 
 pub struct LightmapPlugin;
 
@@ -150,11 +151,11 @@ impl CameraTargets {
         sprite_image.resize(target_size);
         light_image.resize(target_size);
 
-        let sprite_image_handle: Handle<Image> = weak_handle!("4098187b-13f5-4531-a584-a2b4c7ad3e05");
-        let light_image_handle: Handle<Image> = weak_handle!("13e36f32-8c1d-4566-be37-5a7da7cea2ca");
+        let sprite_image_handle: Handle<Image> = uuid_handle!("4098187b-13f5-4531-a584-a2b4c7ad3e05");
+        let light_image_handle: Handle<Image> = uuid_handle!("13e36f32-8c1d-4566-be37-5a7da7cea2ca");
 
-        images.insert(&sprite_image_handle, sprite_image);
-        images.insert(&light_image_handle, light_image);
+        let _ = images.insert(&sprite_image_handle, sprite_image);
+        let _ = images.insert(&light_image_handle, light_image);
 
         Self {
             sprite_target: sprite_image_handle,
@@ -172,7 +173,6 @@ fn setup_sprite_camera(
         .spawn((
             Camera2d,
             Camera {
-                hdr: true,
                 target: RenderTarget::Image(ImageRenderTarget {
                     handle: camera_targets.sprite_target.clone(),
                     scale_factor: FloatOrd(1.0),
@@ -180,6 +180,7 @@ fn setup_sprite_camera(
                 clear_color: lightmap_plugin_settings.clear_color.clone(),
                 ..Default::default()
             },
+            Hdr,
             Name::new("sprite_camera"),
         ))
         .insert(SpriteCamera)
@@ -190,7 +191,6 @@ fn setup_sprite_camera(
         .spawn((
             Camera2d,
             Camera {
-                hdr: true,
                 target: RenderTarget::Image(ImageRenderTarget {
                     handle: camera_targets.light_target.clone(),
                     scale_factor: FloatOrd(1.0),
@@ -198,6 +198,7 @@ fn setup_sprite_camera(
                 clear_color: ClearColorConfig::Custom(lightmap_plugin_settings.ambient_light),
                 ..Default::default()
             },
+            Hdr,
             Name::new("light_camera"),
         ))
         .insert(LightCamera)
@@ -205,8 +206,8 @@ fn setup_sprite_camera(
         .insert(RenderLayers::from_layers(CAMERA_LAYER_LIGHT));
 }
 
-const POST_PROCESSING_QUAD: Handle<Mesh> = weak_handle!("36f3e6a8-0837-4544-9ca9-05dfd13ac6b8");
-const POST_PROCESSING_MATERIAL: Handle<BlendTexturesMaterial> = weak_handle!("f9e193d4-d737-433d-820e-9e42b1c70af9");
+const POST_PROCESSING_QUAD: Handle<Mesh> = uuid_handle!("36f3e6a8-0837-4544-9ca9-05dfd13ac6b8");
+const POST_PROCESSING_MATERIAL: Handle<BlendTexturesMaterial> = uuid_handle!("f9e193d4-d737-433d-820e-9e42b1c70af9");
 
 fn setup_post_processing_camera(
     mut commands: Commands,
@@ -224,7 +225,7 @@ fn setup_post_processing_camera(
     );
 
     let quad =  Mesh::from(Rectangle::new(primary_size.x, primary_size.y));
-    meshes.insert(&POST_PROCESSING_QUAD, quad);
+    let _ = meshes.insert(&POST_PROCESSING_QUAD, quad);
 
     *camera_targets = CameraTargets::create(&mut images, &primary_size);
 
@@ -233,7 +234,7 @@ fn setup_post_processing_camera(
         texture2: camera_targets.light_target.clone(),
     };
 
-    materials.insert(&POST_PROCESSING_MATERIAL, material);
+    let _ = materials.insert(&POST_PROCESSING_MATERIAL, material);
 
     let layer = RenderLayers::from_layers(CAMERA_FINAL_IMAGE);
 
@@ -252,9 +253,9 @@ fn setup_post_processing_camera(
             Camera2d,
             Camera {
                 order: 1,
-                hdr: true,
                 ..default()
             },
+            Hdr,
         ),
         layer
     )).id();
@@ -265,7 +266,7 @@ fn setup_post_processing_camera(
 }
 
 fn on_resize_window(
-    mut resize_reader: EventReader<WindowResized>,
+    mut resize_reader: MessageReader<WindowResized>,
     window: Query<&Window, With<PrimaryWindow>>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut camera_targets: ResMut<CameraTargets>,
@@ -280,7 +281,7 @@ fn on_resize_window(
         );
 
         let quad =  Mesh::from(Rectangle::new(primary_size.x, primary_size.y));
-        meshes.insert(&POST_PROCESSING_QUAD, quad);
+        let _ = meshes.insert(&POST_PROCESSING_QUAD, quad);
 
         *camera_targets = CameraTargets::create(&mut images, &primary_size);
 
@@ -289,6 +290,6 @@ fn on_resize_window(
             texture2: camera_targets.light_target.clone(),
         };
 
-        materials.insert(&POST_PROCESSING_MATERIAL, material);
+        let _ = materials.insert(&POST_PROCESSING_MATERIAL, material);
     }
 }

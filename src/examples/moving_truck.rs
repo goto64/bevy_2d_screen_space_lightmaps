@@ -1,6 +1,6 @@
 use bevy::input::mouse::{MouseScrollUnit, MouseWheel};
 use bevy::prelude::*;
-use bevy::render::view::RenderLayers;
+use bevy::camera::visibility::RenderLayers;
 use bevy_2d_screen_space_lightmaps::lightmap_plugin::lightmap_plugin::{CAMERA_LAYER_SPRITE, CAMERA_LAYER_LIGHT, LightmapPlugin, AnyNormalCamera};
 
 const NORMAL_LIGHT_LAYER_Z: f32 = 0.0;
@@ -191,7 +191,7 @@ fn move_truck(
 }
 
 pub fn camera_movement(
-    mut wheel: EventReader<MouseWheel>,
+    mut wheel: MessageReader<MouseWheel>,
     mut query: Query<&mut Projection, With<AnyNormalCamera>>,
 ) {
 
