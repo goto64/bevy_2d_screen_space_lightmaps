@@ -220,8 +220,8 @@ fn setup_post_processing_camera(
 ) {
     let Ok(window) = window.single() else { panic!("No window") };
     let primary_size = Vec2::new(
-        (window.physical_width() as f32 / window.scale_factor()) as f32,
-        (window.physical_height() as f32 / window.scale_factor()) as f32,
+        window.physical_width() as f32 / window.scale_factor(),
+        window.physical_height() as f32 / window.scale_factor(),
     );
 
     let quad =  Mesh::from(Rectangle::new(primary_size.x, primary_size.y));
@@ -273,11 +273,11 @@ fn on_resize_window(
     mut images: ResMut<Assets<Image>>,
     mut materials: ResMut<Assets<BlendTexturesMaterial>>,
 ) {
-    for ev in resize_reader.read() {
+    for _ in resize_reader.read() {
         let Ok(window) = window.single() else { panic!("No window") };
         let primary_size = Vec2::new(
-            (ev.width / window.scale_factor()) as f32,
-            (ev.height / window.scale_factor()) as f32,
+            window.physical_width() as f32 / window.scale_factor(),
+            window.physical_height() as f32 / window.scale_factor(),
         );
 
         let quad =  Mesh::from(Rectangle::new(primary_size.x, primary_size.y));
