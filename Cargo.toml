@@ -5,7 +5,7 @@ license-file = "LICENSE"
 homepage = "https://github.com/goto64/bevy_2d_screen_space_lightmaps"
 repository = "https://github.com/goto64/bevy_2d_screen_space_lightmaps"
 readme = "readme.md"
-version = "0.17.0"
+version = "0.17.1"
 edition = "2021"
 exclude = ["assets/sample_art/*", "screenshot/*", ".idea/*"]
 
