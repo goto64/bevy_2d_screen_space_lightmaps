@@ -1,6 +1,5 @@
 use bevy::asset::{uuid_handle};
 use bevy::camera::{ImageRenderTarget, RenderTarget};
-use bevy::math::FloatOrd;
 use bevy::render::view::Hdr;
 use bevy::prelude::*;
 use bevy::shader::ShaderRef;
@@ -173,13 +172,13 @@ fn setup_sprite_camera(
         .spawn((
             Camera2d,
             Camera {
-                target: RenderTarget::Image(ImageRenderTarget {
-                    handle: camera_targets.sprite_target.clone(),
-                    scale_factor: FloatOrd(1.0),
-                }),
                 clear_color: lightmap_plugin_settings.clear_color.clone(),
                 ..Default::default()
             },
+            RenderTarget::Image(ImageRenderTarget {
+                handle: camera_targets.sprite_target.clone(),
+                scale_factor: 1.0,
+            }),
             Hdr,
             Name::new("sprite_camera"),
         ))
@@ -191,13 +190,13 @@ fn setup_sprite_camera(
         .spawn((
             Camera2d,
             Camera {
-                target: RenderTarget::Image(ImageRenderTarget {
-                    handle: camera_targets.light_target.clone(),
-                    scale_factor: FloatOrd(1.0),
-                }),
                 clear_color: ClearColorConfig::Custom(lightmap_plugin_settings.ambient_light),
                 ..Default::default()
             },
+            RenderTarget::Image(ImageRenderTarget {
+                handle: camera_targets.light_target.clone(),
+                scale_factor: 1.0,
+            }),
             Hdr,
             Name::new("light_camera"),
         ))

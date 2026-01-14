@@ -43,6 +43,7 @@ To run the example use: `cargo run --example moving_truck`
 
 | Bevy   | bevy_2d_screen_space_lightmaps |
 |--------|--------------------------------|
+| 0.18.x | 0.18.0                         |
 | 0.17.x | 0.17.1                         |
 | 0.17.x | 0.17.0                         |
 | 0.16.x | 0.16.0                         |
