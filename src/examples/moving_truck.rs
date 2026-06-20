@@ -110,17 +110,17 @@ fn spawn_road_entities(
 pub struct TruckEntity;
 
 #[derive(Resource)]
-pub struct TruckEntityRef {
-    id: Entity
+pub struct TruckDirection {
+    pub forward: bool
 }
-
 const TRUCK_START_Y: f32 = 64.0 * 5.0 - 77.0;
+const TRUCK_BOTTOM_Y: f32 = -310.0;
 
 fn spawn_truck_entities(
     mut commands: Commands,
     asset_server: Res<AssetServer>
 ) {
-    let truck_id = commands.spawn((
+    let _truck_id = commands.spawn((
         Sprite {
             image: asset_server.load("sample_art/truck_sprite.png"),
             ..default()
@@ -131,7 +131,7 @@ fn spawn_truck_entities(
         .insert(TruckEntity)
         .id();
 
-    commands.insert_resource(TruckEntityRef { id: truck_id });
+    commands.insert_resource(TruckDirection { forward: true });
 
     // This blocks street light from lighting up the top of the truck
     // It must have the same color as the ambient light
@@ -168,24 +168,22 @@ fn spawn_truck_entities(
 
 fn move_truck(
     mut truck_q: Query<&mut Transform, With<TruckEntity>>,
-    truck_entity_ref: Res<TruckEntityRef>,
+    mut truck_dir: ResMut<TruckDirection>,
     time: Res<Time>,
 ) {
-    let mut move_y: f32 = -32.0;
-    let mut move_back = false;
-    if let Ok(main_transform) = truck_q.get(truck_entity_ref.id) {
-        if main_transform.translation.y < -310.0 {
-            // Return truck to the top of the road
-            move_y = 580.0;
-            move_back = true;
-        }
-    }
+    let speed = 32.0 * time.delta_secs();
 
     for mut transform in truck_q.iter_mut() {
-        if move_back {
-            transform.translation.y += move_y;
+        if truck_dir.forward {
+            transform.translation.y -= speed;
+            if transform.translation.y <= TRUCK_BOTTOM_Y {
+                truck_dir.forward = false;
+            }
         } else {
-            transform.translation.y += move_y * time.delta_secs();
+            transform.translation.y += speed;
+            if transform.translation.y >= TRUCK_START_Y {
+                truck_dir.forward = true;
+            }
         }
     }
 }

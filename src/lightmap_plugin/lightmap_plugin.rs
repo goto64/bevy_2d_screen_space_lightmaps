@@ -1,6 +1,5 @@
 use bevy::asset::{uuid_handle};
-use bevy::camera::{ImageRenderTarget, RenderTarget};
-use bevy::render::view::Hdr;
+use bevy::camera::{Hdr, ImageRenderTarget, RenderTarget};
 use bevy::prelude::*;
 use bevy::shader::ShaderRef;
 use bevy::mesh::MeshVertexBufferLayoutRef;
@@ -124,7 +123,7 @@ impl CameraTargets {
                 label:           Some("target_sprite"),
                 size:            target_size,
                 dimension:       TextureDimension::D2,
-                format:          TextureFormat::bevy_default(),
+                format:          TextureFormat::Rgba8Unorm,
                 mip_level_count: 1,
                 sample_count:    1,
                 usage:           TextureUsages::TEXTURE_BINDING | TextureUsages::COPY_DST | TextureUsages::RENDER_ATTACHMENT,
@@ -137,7 +136,7 @@ impl CameraTargets {
                 label:           Some("target_light"),
                 size:            target_size,
                 dimension:       TextureDimension::D2,
-                format:          TextureFormat::bevy_default(),
+                format:          TextureFormat::Rgba8Unorm,
                 mip_level_count: 1,
                 sample_count:    1,
                 usage:           TextureUsages::TEXTURE_BINDING | TextureUsages::COPY_DST | TextureUsages::RENDER_ATTACHMENT,
