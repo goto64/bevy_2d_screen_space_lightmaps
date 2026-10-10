@@ -5,7 +5,7 @@ use bevy::shader::ShaderRef;
 use bevy::mesh::MeshVertexBufferLayoutRef;
 use bevy::render::render_resource::{AsBindGroup, BlendComponent, BlendFactor, BlendOperation, BlendState, Extent3d, RenderPipelineDescriptor, SpecializedMeshPipelineError, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages};
 use bevy::camera::visibility::RenderLayers;
-use bevy::sprite_render::{Material2d, Material2dKey, Material2dPlugin};
+use bevy::sprite_render::{Material2d, Material2dKey, Material2dPipeline, Material2dPlugin};
 use bevy::window::{PrimaryWindow, WindowResized};
 use bevy::post_process::bloom::Bloom;
 
@@ -86,10 +86,11 @@ struct BlendTexturesMaterial {
 
 impl Material2d for BlendTexturesMaterial {
     fn fragment_shader() -> ShaderRef {
-        "lightmap_shader/blend_mult_textures.wgsl".into()
+        "lightmap_shader/blend_mult_textures.wesl".into()
     }
 
     fn specialize(
+        _pipeline: &Material2dPipeline,
         descriptor: &mut RenderPipelineDescriptor,
         _layout: &MeshVertexBufferLayoutRef,
         _key: Material2dKey<Self>,
